@@ -1,0 +1,14 @@
+{
+  "name": "meetup-kit",
+  "version": "0.1.0",
+  "description": "Landings para meetups con registro y seguimiento por canal. Hecho por 0xAI Builders para la comunidad de Team1 LatAm.",
+  "type": "module",
+  "license": "MIT",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --no-warnings=ExperimentalWarning src/server.mjs",
+    "dev": "node --no-warnings=ExperimentalWarning --watch src/server.mjs",
+    "test": "node --no-warnings=ExperimentalWarning --test \"test/*.test.mjs\""
+  },
+  "repository": { "type": "git", "url": "https://github.com/0xAI-Builders/meetup-kit.git" }
+}
