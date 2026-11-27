@@ -49,11 +49,14 @@ docker compose up -d --build
 
 Los datos (SQLite y portadas) quedan en `./data`. Para respaldar basta copiar esa carpeta. Detrás de nginx pon `TRUST_PROXY=1`; hay un ejemplo en `deploy/nginx.conf.example`.
 
+Para servirla en una subruta de otro dominio (por ejemplo `https://team1.0xai.build/meetup-generator`), pon `BASE_PATH=/meetup-generator` y `BASE_URL=https://team1.0xai.build/meetup-generator`. nginx pasa la ruta completa, con el prefijo, y la app lo quita al entrar y lo agrega a cada liga, archivo y llamada del navegador. `/meetup-generator` redirige a `/meetup-generator/`. Ejemplo en `deploy/nginx-subruta.conf.example`.
+
 ## Variables
 
 | Variable | Valor por omisión | Uso |
 |---|---|---|
-| `BASE_URL` | `http://localhost:7343` | Dirección pública, para ligas, QR y `.ics` |
+| `BASE_URL` | `http://localhost:7343` | Dirección pública, para ligas, QR y `.ics`. Con subruta, la incluye |
+| `BASE_PATH` | vacío | Subruta donde vive la app, por ejemplo `/meetup-generator`. Vacío = raíz del dominio |
 | `SALT` | (ninguna en producción) | Sal de la huella de personas únicas. Con `NODE_ENV=production` el servicio no arranca sin ella |
 | `CREATE_CODE` | vacío | Código para crear meetups |
 | `TRUST_PROXY` | `0` | Leer la IP de `X-Real-IP` |

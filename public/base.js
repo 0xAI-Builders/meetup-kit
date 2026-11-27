@@ -2,6 +2,8 @@
 (() => {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const MK = (window.MK = window.MK || {});
+  // Subruta de la app ('' si vive en la raíz del dominio). La pone el servidor en <body data-base>.
+  MK.base = document.body.dataset.base || '';
 
   // Entradas al hacer scroll
   const io = 'IntersectionObserver' in window

@@ -1,0 +1,14 @@
+# La app en una subruta: https://ejemplo.com/meetup-generator
+# En el .env de la app: BASE_PATH=/meetup-generator y BASE_URL=https://ejemplo.com/meetup-generator
+# proxy_pass va SIN ruta al final para que nginx mande el prefijo tal cual; la app lo quita.
+server {
+    listen 80;
+    server_name ejemplo.com;
+    client_max_body_size 5m;
+
+    location = /meetup-generator { proxy_pass http://127.0.0.1:7343; include /etc/nginx/proxy_params; }
+    location /meetup-generator/ { proxy_pass http://127.0.0.1:7343; include /etc/nginx/proxy_params; }
+
+    # El resto del dominio es de otras cosas; aquí, de momento, todo lleva a la app.
+    location / { return 301 /meetup-generator/; }
+}

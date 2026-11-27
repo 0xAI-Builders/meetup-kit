@@ -21,6 +21,8 @@ export const config = {
   host: process.env.HOST || '127.0.0.1',
   dataDir: process.env.DATA_DIR || join(ROOT, 'data'),
   baseUrl: (process.env.BASE_URL || 'http://localhost:7343').replace(/\/$/, ''),
+  // Subruta donde vive la app detrás del proxy (por ejemplo /meetup-generator). Vacío = raíz del dominio.
+  basePath: process.env.BASE_PATH || '',
   createCode: process.env.CREATE_CODE || '',
   salt: process.env.SALT || 'cambia-esta-sal',
   trustProxy: process.env.TRUST_PROXY === '1',
@@ -35,8 +37,18 @@ export const config = {
 export const TEMAS = ['avalanche', 'aurora', 'menta', 'ambar', 'cielo'];
 const RESERVADOS = new Set(['crear', 'api', 'static', 'u', 'healthz', 'panel', 'favicon.ico', 'robots.txt', 'sitemap.xml']);
 
+/** Normaliza la subruta: con diagonal al inicio, sin diagonal final; '' o '/' = raíz. */
+export function normBasePath(p) {
+  const s = String(p || '').trim().replace(/\/+$/, '');
+  if (!s) return '';
+  if (!/^(\/[A-Za-z0-9._~-]+)+$/.test(s.startsWith('/') ? s : '/' + s)) throw new Error(`BASE_PATH no válido: ${p}`);
+  return s.startsWith('/') ? s : '/' + s;
+}
+
 export function createApp(opts = {}) {
   const cfg = { ...config, ...opts };
+  cfg.basePath = normBasePath(cfg.basePath);
+  const bp = cfg.basePath;
   const store = openDb(opts.dbFile || join(cfg.dataDir, 'meetup-kit.sqlite'));
   const uploads = join(cfg.dataDir, 'uploads');
   const limits = new Map();
@@ -224,17 +236,25 @@ export function createApp(opts = {}) {
     }
   }
 
-  const ctxFor = () => ({ base: cfg.baseUrl, createCode: !!cfg.createCode, defaultTz: cfg.defaultTz, links: cfg.links, now: Date.now() });
+  const ctxFor = () => ({ base: cfg.baseUrl, bp, createCode: !!cfg.createCode, defaultTz: cfg.defaultTz, links: cfg.links, now: Date.now() });
 
   // ---------- rutas ----------
   async function handle(req, res) {
     const url = new URL(req.url, 'http://x');
-    const path = decodeURIComponent(url.pathname).replace(/\/+$/, '') || '/';
+    let raw = url.pathname;
+    // Con subruta: el proxy manda la ruta completa (/meetup-generator/...) y aquí se le quita el prefijo.
+    // /healthz responde también sin prefijo para el healthcheck del contenedor.
+    if (bp && raw !== '/healthz') {
+      if (raw === bp) return redirect(res, bp + '/' + url.search, 301);
+      if (!raw.startsWith(bp + '/')) return send(res, 404, notFoundPage(ctxFor()));
+      raw = raw.slice(bp.length);
+    }
+    const path = decodeURIComponent(raw).replace(/\/+$/, '') || '/';
     const method = req.method;
     const ip = ipOf(req);
 
     if (path === '/healthz') return send(res, 200, 'ok', 'text/plain');
-    if (path === '/robots.txt') return send(res, 200, `User-agent: *\nDisallow: /api/\nDisallow: /*/panel\nSitemap: ${cfg.baseUrl}/sitemap.xml\n`, 'text/plain');
+    if (path === '/robots.txt') return send(res, 200, `User-agent: *\nDisallow: ${bp}/api/\nDisallow: ${bp}/*/panel\nSitemap: ${cfg.baseUrl}/sitemap.xml\n`, 'text/plain');
     if (path === '/sitemap.xml') {
       const urls = [cfg.baseUrl + '/', ...store.proximos(Date.now() - 365 * 86400e3, 200).map((m) => `${cfg.baseUrl}/${m.slug}`)];
       return send(res, 200, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${u}</loc></url>`).join('')}</urlset>`, 'application/xml');
@@ -360,6 +380,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === normalize(process.argv
     process.exit(1);
   }
   await mkdir(cfg.dataDir, { recursive: true });
-  server.listen(cfg.port, cfg.host, () => console.log(`Meetup Kit en ${cfg.baseUrl} (escuchando ${cfg.host}:${cfg.port})`));
+  if (cfg.basePath && !cfg.baseUrl.endsWith(cfg.basePath)) console.warn(`Aviso: BASE_URL (${cfg.baseUrl}) debería terminar en BASE_PATH (${cfg.basePath}).`);
+  server.listen(cfg.port, cfg.host, () => console.log(`Meetup Kit en ${cfg.baseUrl} (escuchando ${cfg.host}:${cfg.port}${cfg.basePath ? `, subruta ${cfg.basePath}` : ''})`));
 }
 

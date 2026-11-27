@@ -1,6 +1,7 @@
 // Panel privado del organizador.
 (() => {
   const MK = window.MK;
+  const BP = MK.base;
   const meta = JSON.parse(document.getElementById('mk')?.textContent || '{}');
   const $ = (s, r = document) => r.querySelector(s);
   const lock = $('.lock');
@@ -20,7 +21,7 @@
   }
   if (!key) return showLock();
 
-  $('[data-edit]').href = `/crear?editar=${meta.slug}#k=${key}`;
+  $('[data-edit]').href = `${BP}/crear?editar=${meta.slug}#k=${key}`;
   let first = true;
   load();
   setInterval(() => document.visibilityState === 'visible' && load(), 30_000);
@@ -40,7 +41,7 @@
 
   async function load() {
     try {
-      const r = await fetch(`/api/meetups/${meta.slug}/stats`, { headers: { 'x-key': key } });
+      const r = await fetch(`${BP}/api/meetups/${meta.slug}/stats`, { headers: { 'x-key': key } });
       if (r.status === 403) return showLock('Esa liga privada no es válida para este meetup.');
       if (!r.ok) throw new Error();
       render(await r.json());

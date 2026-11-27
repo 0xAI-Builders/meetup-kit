@@ -27,9 +27,9 @@ ${p.map((s) => `<a class="step reveal" style="--d:${s.n}" href="${href(s.k)}" da
 </div></section>`;
 }
 
-export function landingPage({ m, src = 'directo', base, now, preview = false, modo: forced }) {
+export function landingPage({ m, src = 'directo', base, bp = '', now, preview = false, modo: forced }) {
   const modo = ['antes', 'vivo', 'despues'].includes(forced) ? forced : modoDe(m, now);
-  const go = (dest) => (preview ? '#' : `/${m.slug}/ir/${dest}?s=${encodeURIComponent(src)}`);
+  const go = (dest) => (preview ? '#' : `${bp}/${m.slug}/ir/${dest}?s=${encodeURIComponent(src)}`);
   const dia = fmtDay(m.inicio, m.tz);
   const hora = `${fmtTime(m.inicio, m.tz)} a ${fmtTime(m.fin, m.tz)}`;
   const portada = m.portada ? (m.portada.startsWith('data:') ? m.portada : `${base}${m.portada}`) : '';
@@ -38,7 +38,7 @@ export function landingPage({ m, src = 'directo', base, now, preview = false, mo
   const chips = [m.comunidad, m.ciudad].filter(Boolean).map((c) => `<span class="chip">${esc(c)}</span>`).join('');
   const ticker = [fmtShort(m.inicio, m.tz), fmtTime(m.inicio, m.tz).toUpperCase(), m.lugar, m.ciudad, 'ENTRADA LIBRE', 'CUPO LIMITADO'].filter(Boolean).map(esc);
   const tickerHtml = Array(4).fill(ticker.map((t) => `<span>${t}</span><i>✦</i>`).join('')).join('');
-  const calHref = preview ? '#' : `/${m.slug}/evento.ics?s=${encodeURIComponent(src)}`;
+  const calHref = preview ? '#' : `${bp}/${m.slug}/evento.ics?s=${encodeURIComponent(src)}`;
   const mapa = m.mapa_url || (m.direccion ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${m.lugar} ${m.direccion}`)}` : '');
 
   const cta =
@@ -61,7 +61,7 @@ ${['días', 'horas', 'min', 'seg'].map((u, i) => `<div class="cd-u"><span class=
   const titulo = modo === 'despues' ? `Gracias por venir a ${m.titulo}` : m.titulo;
 
   const body = `
-<header class="lnav wrap">${logo()}
+<header class="lnav wrap">${logo('', bp)}
 <div class="lnav-r">
 <button class="btn btn-icon" type="button" data-share aria-label="Compartir"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 3v12m0-12-4 4m4-4 4 4M5 13v5a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
 ${modo === 'antes' ? `<a class="btn btn-primary btn-sm hide-m" href="${go('registro')}" data-ev="registro">Registrarme</a>` : ''}
@@ -104,7 +104,7 @@ ${modo === 'antes' ? `${pasosAvalanche(go, false).replace('<section class="steps
 
 </main>
 
-<footer class="foot-mini wrap"><span>${esc(m.organiza || m.comunidad || 'Meetup')} · ${esc(fmtShort(m.inicio, m.tz))}</span><a href="/">Hecho con Meetup Kit</a></footer>
+<footer class="foot-mini wrap"><span>${esc(m.organiza || m.comunidad || 'Meetup')} · ${esc(fmtShort(m.inicio, m.tz))}</span><a href="${bp}/">Hecho con Meetup Kit</a></footer>
 
 ${modo === 'antes' ? `<div class="sticky-cta"><div><b>${esc(fmtShort(m.inicio, m.tz))}</b><span>${esc(fmtTime(m.inicio, m.tz))} · ${esc(m.lugar || m.ciudad || '')}</span></div><a class="btn btn-primary" href="${go('registro')}" data-ev="registro">Apartar lugar</a></div>` : ''}
 <div class="toast" role="status" aria-live="polite"></div>
@@ -116,6 +116,7 @@ ${modo === 'antes' ? `<div class="sticky-cta"><div><b>${esc(fmtShort(m.inicio, m
     url,
     og,
     tema: m.tema,
+    bp,
     robots: preview ? 'noindex' : 'index,follow',
     bodyClass: `landing modo-${modo}${preview ? ' is-preview' : ''}`,
     body,

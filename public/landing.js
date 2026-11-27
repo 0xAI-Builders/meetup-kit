@@ -5,9 +5,10 @@
   const beacon = (ev) => {
     if (data.preview) return;
     const body = JSON.stringify({ slug: data.slug, ev, src: data.src });
+    const to = MK.base + '/api/e';
     try {
-      if (!(navigator.sendBeacon && navigator.sendBeacon('/api/e', new Blob([body], { type: 'application/json' }))))
-        fetch('/api/e', { method: 'POST', body, headers: { 'content-type': 'application/json' }, keepalive: true });
+      if (!(navigator.sendBeacon && navigator.sendBeacon(to, new Blob([body], { type: 'application/json' }))))
+        fetch(to, { method: 'POST', body, headers: { 'content-type': 'application/json' }, keepalive: true });
     } catch {}
   };
 

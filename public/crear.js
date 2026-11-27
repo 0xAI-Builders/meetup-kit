@@ -1,6 +1,7 @@
 // Asistente para crear o editar la landing de un meetup.
 (() => {
   const MK = window.MK;
+  const BP = MK.base;
   const form = document.getElementById('wizard');
   if (!form) return;
   const steps = [...form.querySelectorAll('.wz-step')];
@@ -41,7 +42,7 @@
     dropImg.hidden = !src;
     dropX.hidden = !src;
     drop.querySelector('.drop-empty').style.visibility = src ? 'hidden' : '';
-    if (src) dropImg.src = src;
+    if (src) dropImg.src = src.startsWith('/u/') ? BP + src : src;
     schedule();
   };
   const loadFile = async (f) => {
@@ -92,7 +93,7 @@
     const big = d.portada.startsWith('data:');
     const my = ++seq;
     try {
-      const r = await fetch('/api/preview', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...d, portada: big ? PV : d.portada, modo }) });
+      const r = await fetch(BP + '/api/preview', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ...d, portada: big ? PV : d.portada, modo }) });
       if (my !== seq || !r.ok) return;
       let html = await r.text();
       if (big) html = html.split(PV).join(d.portada);
@@ -155,7 +156,7 @@
     btnNext.classList.add('is-busy');
     hideErr();
     try {
-      const r = await fetch(editing ? `/api/meetups/${edit.slug}` : '/api/meetups', {
+      const r = await fetch(editing ? `${BP}/api/meetups/${edit.slug}` : BP + '/api/meetups', {
         method: editing ? 'PUT' : 'POST',
         headers: { 'content-type': 'application/json', ...(editing ? { 'x-key': edit.key } : {}) },
         body: JSON.stringify(data()),
@@ -164,7 +165,7 @@
       if (!r.ok) return showErr(j.error || 'No se pudo guardar. Intenta otra vez.');
       if (editing) {
         MK.toast('Cambios guardados');
-        setTimeout(() => (location.href = `/${edit.slug}/panel#k=${edit.key}`), 700);
+        setTimeout(() => (location.href = `${BP}/${edit.slug}/panel#k=${edit.key}`), 700);
         return;
       }
       try {
@@ -212,7 +213,7 @@
   async function loadEdit() {
     head.kicker.textContent = 'Editar landing';
     try {
-      const r = await fetch(`/api/meetups/${edit.slug}`, { headers: { 'x-key': edit.key } });
+      const r = await fetch(`${BP}/api/meetups/${edit.slug}`, { headers: { 'x-key': edit.key } });
       if (!r.ok) throw new Error();
       const m = await r.json();
       const lp = localParts(m.inicio, m.tz);

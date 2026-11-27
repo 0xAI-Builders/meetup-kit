@@ -1,16 +1,16 @@
 import { esc, fmtShort, fmtTime } from '../util.mjs';
 import { shell, logo, footer, TEMAS } from './layout.mjs';
 
-const card = (m, base) => {
+const card = (m, base, bp) => {
   const t = TEMAS[m.tema] || TEMAS.avalanche;
-  return `<a class="mcard reveal" href="/${m.slug}" style="--accent:${t.a};--accent-2:${t.b}">
+  return `<a class="mcard reveal" href="${bp}/${m.slug}" style="--accent:${t.a};--accent-2:${t.b}">
 <div class="mcard-img">${m.portada ? `<img src="${esc(base + m.portada)}" alt="" loading="lazy" decoding="async">` : '<div class="hero-art small"><i></i><i></i><i></i></div>'}<span class="mcard-date">${esc(fmtShort(m.inicio, m.tz))}</span></div>
 <div class="mcard-b"><b>${esc(m.titulo)}</b><span>${esc([fmtTime(m.inicio, m.tz), m.lugar, m.ciudad].filter(Boolean).join(' · '))}</span>${m.comunidad ? `<span class="chip">${esc(m.comunidad)}</span>` : ''}</div></a>`;
 };
 
-export function homePage({ base, proximos, pasados, totales }) {
+export function homePage({ base, bp = '', proximos, pasados, totales }) {
   const body = `
-<header class="hnav wrap">${logo()}<nav><a href="#como" class="hide-m">Cómo funciona</a><a href="#meetups" class="hide-m">Meetups</a><a class="btn btn-primary btn-sm" href="/crear">Crear mi landing</a></nav></header>
+<header class="hnav wrap">${logo('', bp)}<nav><a href="#como" class="hide-m">Cómo funciona</a><a href="#meetups" class="hide-m">Meetups</a><a class="btn btn-primary btn-sm" href="${bp}/crear">Crear mi landing</a></nav></header>
 <main>
 <section class="home-hero">
 <div class="aurora" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
@@ -19,7 +19,7 @@ export function homePage({ base, proximos, pasados, totales }) {
 <p class="kicker reveal">Para organizadores de la comunidad de Team1 LatAm</p>
 <h1 class="display mega"><span class="line"><span>Tu meetup,</span></span><span class="line"><span class="grad">lleno.</span></span></h1>
 <p class="lead reveal" style="--d:3">Arma la landing de tu meetup en dos minutos, comparte una liga distinta por cada canal y ve en vivo quién llega de dónde. Después del evento, la misma página lleva a tu gente a dar su primer paso en Avalanche.</p>
-<div class="ctas reveal" style="--d:4"><a class="btn btn-primary btn-xl magnetic" href="/crear"><span>Crear mi landing</span><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M5 10h10m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="btn btn-ghost" href="#como">Ver cómo funciona</a></div>
+<div class="ctas reveal" style="--d:4"><a class="btn btn-primary btn-xl magnetic" href="${bp}/crear"><span>Crear mi landing</span><svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true"><path d="M5 10h10m-4-4 4 4-4 4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></a><a class="btn btn-ghost" href="#como">Ver cómo funciona</a></div>
 ${totales.meetups ? `<div class="kpis reveal" style="--d:5">
 <div><b data-count="${totales.meetups}">0</b><span>meetups</span></div>
 <div><b data-count="${totales.visitas}">0</b><span>visitas</span></div>
@@ -47,18 +47,19 @@ ${totales.meetups ? `<div class="kpis reveal" style="--d:5">
 <section class="list wrap" id="meetups">
 <p class="kicker reveal">Próximos meetups</p>
 <h2 class="h2 reveal">Lo que viene en la comunidad</h2>
-${proximos.length ? `<div class="mgrid">${proximos.map((m) => card(m, base)).join('')}</div>` : `<div class="empty reveal"><p>Todavía no hay meetups próximos. ¿Armas el primero?</p><a class="btn btn-primary" href="/crear">Crear mi landing</a></div>`}
-${pasados.length ? `<p class="kicker reveal" style="margin-top:56px">Ya pasaron</p><div class="mgrid past">${pasados.map((m) => card(m, base)).join('')}</div>` : ''}
+${proximos.length ? `<div class="mgrid">${proximos.map((m) => card(m, base, bp)).join('')}</div>` : `<div class="empty reveal"><p>Todavía no hay meetups próximos. ¿Armas el primero?</p><a class="btn btn-primary" href="${bp}/crear">Crear mi landing</a></div>`}
+${pasados.length ? `<p class="kicker reveal" style="margin-top:56px">Ya pasaron</p><div class="mgrid past">${pasados.map((m) => card(m, base, bp)).join('')}</div>` : ''}
 </section>
 
-<section class="final wrap reveal"><h2 class="display final-t">Tu próximo meetup<br><span class="grad">empieza aquí.</span></h2><a class="btn btn-primary btn-xl magnetic" href="/crear"><span>Crear mi landing</span></a><p class="small">Gratis y de código abierto.</p></section>
+<section class="final wrap reveal"><h2 class="display final-t">Tu próximo meetup<br><span class="grad">empieza aquí.</span></h2><a class="btn btn-primary btn-xl magnetic" href="${bp}/crear"><span>Crear mi landing</span></a><p class="small">Gratis y de código abierto.</p></section>
 </main>
-${footer()}`;
+${footer(bp)}`;
   return shell({
     title: 'Meetup Kit · Landings para meetups de la comunidad de Team1',
     desc: 'Arma la landing de tu meetup en dos minutos, comparte una liga por canal y mide quién llega de dónde. Hecho por 0xAI Builders.',
     url: base + '/',
     og: base + '/static/og-default.png',
+    bp,
     bodyClass: 'home',
     body,
     scripts: ['home.js'],

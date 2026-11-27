@@ -14,9 +14,9 @@ const field = (name, label, { type = 'text', ph = '', req = false, max = 120, he
 <input name="${name}" type="${type}" placeholder="${esc(ph)}" ${req ? 'required' : ''} ${type === 'text' || type === 'url' ? `maxlength="${max}"` : ''} ${attrs} autocomplete="off">
 ${help ? `<span class="field-h">${help}</span>` : ''}</label>`;
 
-export function crearPage({ createCode, defaultTz }) {
+export function crearPage({ bp = '', createCode, defaultTz }) {
   const body = `
-<header class="cnav wrap">${logo()}<div class="progress" aria-hidden="true"><i></i></div><button class="btn btn-ghost btn-sm show-m" type="button" data-preview-open>Ver cómo queda</button></header>
+<header class="cnav wrap">${logo('', bp)}<div class="progress" aria-hidden="true"><i></i></div><button class="btn btn-ghost btn-sm show-m" type="button" data-preview-open>Ver cómo queda</button></header>
 <main class="crear wrap">
 <form class="wizard" id="wizard" novalidate>
 <div class="wz-head"><p class="kicker" data-modo-label>Nueva landing</p><h1 class="h2" data-step-title>Lo básico</h1><p class="small" data-step-sub>Cómo se llama y cuándo es.</p></div>
@@ -80,5 +80,5 @@ ${createCode ? field('codigo', 'Código de acceso', { req: true, max: 60, help: 
 <div class="ctas"><a class="btn btn-primary btn-lg" data-out-href="panel">Ir a mi panel</a><a class="btn btn-ghost" data-out-href="url" target="_blank" rel="noopener">Ver mi landing</a></div>
 </section>
 </main>`;
-  return shell({ title: 'Crear mi landing · Meetup Kit', desc: 'Arma la landing de tu meetup en dos minutos.', robots: 'noindex', bodyClass: 'crear-page', body, scripts: ['crear.js'] });
+  return shell({ title: 'Crear mi landing · Meetup Kit', desc: 'Arma la landing de tu meetup en dos minutos.', robots: 'noindex', bp, bodyClass: 'crear-page', body, scripts: ['crear.js'] });
 }

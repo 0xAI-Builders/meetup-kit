@@ -6,11 +6,11 @@ export const CANALES = [
   ['facebook', 'Facebook'], ['correo', 'Correo'], ['luma', 'Luma'], ['qr', 'QR impreso'], ['amigos', 'Boca a boca'],
 ];
 
-export function panelPage({ m, base }) {
+export function panelPage({ m, base, bp = '' }) {
   const body = `
-<header class="pnav wrap">${logo()}
+<header class="pnav wrap">${logo('', bp)}
 <div class="pnav-t"><b>${esc(m.titulo)}</b><span>${esc(fmtShort(m.inicio, m.tz))} · ${esc(fmtTime(m.inicio, m.tz))}</span></div>
-<div class="pnav-r"><span class="livedot" hidden><i></i><span>En vivo</span></span><a class="btn btn-ghost btn-sm" href="/${m.slug}" target="_blank" rel="noopener">Ver landing</a><a class="btn btn-ghost btn-sm" data-edit href="/crear">Editar</a></div>
+<div class="pnav-r"><span class="livedot" hidden><i></i><span>En vivo</span></span><a class="btn btn-ghost btn-sm" href="${bp}/${m.slug}" target="_blank" rel="noopener">Ver landing</a><a class="btn btn-ghost btn-sm" data-edit href="${bp}/crear">Editar</a></div>
 </header>
 <main class="panel wrap">
 <section class="lock" hidden><h1 class="h2">Abre tu panel con tu liga privada</h1><p class="lead">La liga que te dimos al crear el meetup termina en <code>#k=…</code>. Pégala aquí:</p><form class="lock-f"><input name="link" placeholder="https://…/panel#k=…" autocomplete="off"><button class="btn btn-primary" type="submit">Abrir</button></form><p class="form-err" hidden></p></section>
@@ -40,7 +40,7 @@ ${[
 <div class="chans">${CANALES.map(([k, l], i) => `<button type="button" class="chan${i === 0 ? ' is-on' : ''}" data-s="${k}">${l}</button>`).join('')}<label class="chan chan-own"><input placeholder="otro canal" maxlength="24" data-own></label></div>
 <div class="share-out">
 <div class="share-l"><div class="copyrow"><input readonly data-link><button class="btn btn-primary btn-sm" type="button" data-copy-link>Copiar liga</button></div>
-<div class="share-btns"><a class="btn btn-ghost btn-sm" data-wa target="_blank" rel="noopener">Mandar por WhatsApp</a><a class="btn btn-ghost btn-sm" data-tg target="_blank" rel="noopener">Mandar por Telegram</a><a class="btn btn-ghost btn-sm" href="/${m.slug}/cartel?s=qr" target="_blank" rel="noopener">Cartel con QR para imprimir</a></div></div>
+<div class="share-btns"><a class="btn btn-ghost btn-sm" data-wa target="_blank" rel="noopener">Mandar por WhatsApp</a><a class="btn btn-ghost btn-sm" data-tg target="_blank" rel="noopener">Mandar por Telegram</a><a class="btn btn-ghost btn-sm" href="${bp}/${m.slug}/cartel?s=qr" target="_blank" rel="noopener">Cartel con QR para imprimir</a></div></div>
 <div class="qrbox"><canvas width="220" height="220" data-qr aria-label="Código QR de la liga"></canvas><button class="btn btn-ghost btn-sm" type="button" data-qr-dl>Descargar QR</button></div>
 </div>
 </section>
@@ -58,6 +58,7 @@ ${[
     title: `Panel · ${m.titulo}`,
     robots: 'noindex,nofollow',
     tema: m.tema,
+    bp,
     bodyClass: 'panel-page',
     body,
     scripts: ['qrcode.js', 'panel.js'],
