@@ -1,0 +1,13 @@
+services:
+  meetup-kit:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      HOST: 0.0.0.0
+      PORT: 7343
+      DATA_DIR: /data
+    ports:
+      - "127.0.0.1:${HOST_PORT:-7343}:7343"
+    volumes:
+      - ./data:/data
